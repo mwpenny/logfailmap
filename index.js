@@ -55,17 +55,21 @@ var getConnectionIPs = function(logfile, callback) {
 
 /* Get failed login/connection host IPs and their geographical information */
 var getConnectionAttempts = function(logfile, callback) {
+    var ret = {date: Date(), connections: {}};
+
     getConnectionIPs(logfile, function(err, connections) {
         var IPs = Object.keys(connections);
         var located = 0;
         
-        if (IPs.length === 0) return callback(connections);
+        if (IPs.length === 0) return callback(ret);
 
         //Get location information for each IP
         for (var i = 0; i < IPs.length; ++i) {
             geolocate(connections, IPs[i], function() {
-                if (++located === IPs.length)
-                    return callback(connections);
+                if (++located === IPs.length) {
+                    ret.connections = connections;
+                    return callback(ret);
+                }
             });
         }
     });

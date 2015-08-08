@@ -22,37 +22,41 @@ logfailmap("/var/log/auth.log", function(attempts) {
 ```
 
 ##### Attempts object
-The keys of the attempts object are the IP addresses that failed to connect. The values are objects containing the geographical information for each IP, as well as the number of login attempts. Geographical information is obtained from [www.telize.com](http://www.telize.com/) and some IP addresses have less information available than others (e.g., no city). For example,
+The attempts object contains one key/value pair for the date and time the information was retrieved. The rest of the keys are the IP addresses that failed to connect. The values are objects containing the geographical information for each IP, as well as the number of login attempts. Geographical information is obtained from [www.telize.com](http://www.telize.com/) and some IP addresses have less information available than others (e.g., no city). For example,
 ```js
-{
-'8.8.8.8': 
-   { longitude: -122.0838,
-     latitude: 37.386,
-     asn: 'AS15169',
-     offset: '-7',
-     area_code: '0',
-     continent_code: 'NA',
-     dma_code: '0',
-     city: 'Mountain View',
-     timezone: 'America/Los_Angeles',
-     region: 'California',
-     country_code: 'US',
-     isp: 'Google Inc.',
-     postal_code: '94040',
-     country: 'United States',
-     country_code3: 'USA',
-     region_code: 'CA',
-     attempts: 5 },
-'134.170.188.221': 
-    { longitude: -97,
-     latitude: 38,
-     asn: 'AS8075',
-     area_code: '0',
-     continent_code: 'NA',
-     dma_code: '0',
-     country_code: 'US',
-     isp: 'Microsoft Corporation',
-     country: 'United States',
-     country_code3: 'USA' }
+{ date: 'Sat Aug 08 2015 14:00:44 GMT-0400 (EDT)',
+  connections: 
+   { '8.8.8.8': 
+       { longitude: -122.0838,
+         latitude: 37.386,
+         asn: 'AS15169',
+         offset: '-7',
+         ip: '8.8.8.8',
+         area_code: '0',
+         continent_code: 'NA',
+         dma_code: '0',
+         city: 'Mountain View',
+         timezone: 'America/Los_Angeles',
+         region: 'California',
+         country_code: 'US',
+         isp: 'Google Inc.',
+         postal_code: '94040',
+         country: 'United States',
+         country_code3: 'USA',
+         region_code: 'CA',
+         attempts: 5 },
+    '134.170.188.221': 
+        { longitude: -97,
+         latitude: 38,
+         asn: 'AS8075',
+         area_code: '0',
+         ip: '134.170.188.221',
+         continent_code: 'NA',
+         dma_code: '0',
+         country_code: 'US',
+         isp: 'Microsoft Corporation',
+         country: 'United States',
+         country_code3: 'USA' }
+    }
 }
 ```
