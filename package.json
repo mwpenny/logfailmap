@@ -1,0 +1,28 @@
+{
+  "name": "logfailmap",
+  "version": "1.0.0",
+  "description": "A module for extracting and locating IPs that failed to login to a Linux machine",
+  "main": "index.js",
+  "dependencies": {
+    "request": "~2.60.0"
+  },
+  "devDependencies": {},
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mwpenny/logfailmap.git"
+  },
+  "keywords": [
+    "linux",
+    "auth",
+    "server",
+    "login",
+    "fail"
+  ],
+  "author": "Matt Penny <pennycreations@gmail.com> (http://www.github.com/mwpenny)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mwpenny/logfailmap/issues"
+  },
+  "homepage": "https://github.com/mwpenny/logfailmap"
+}
