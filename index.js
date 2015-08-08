@@ -12,7 +12,6 @@ var geolocate = function(connections, ip, callback) {
             /* Copy number of attempts into new data object, then
                overwrite the old connection attempt object */ 
             var connection = JSON.parse(body);
-            delete connection.ip; //Unnecessary. Key of connection object is IP
             connection.attempts = connections[ip].attempts;
             connections[ip] = connection;
         }
