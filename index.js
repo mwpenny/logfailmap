@@ -59,6 +59,8 @@ var getConnectionAttempts = function(logfile, callback) {
     getConnectionIPs(logfile, function(err, connections) {
         var IPs = Object.keys(connections);
         var located = 0;
+        
+        if (IPs.length === 0) return callback(connections);
 
         //Get location information for each IP
         for (var i = 0; i < IPs.length; ++i) {
