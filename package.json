@@ -1,6 +1,6 @@
 {
   "name": "logfailmap",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "A module for extracting and locating IPs that failed to login to a Linux machine",
   "main": "index.js",
   "dependencies": {

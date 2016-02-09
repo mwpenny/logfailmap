@@ -6,7 +6,7 @@ var request = require("request");
 
 /* Add geographical information from IP address and add to connection attempt object */
 var geolocate = function(connections, ip, callback) {
-    request("https://www.telize.com/geoip/" + ip, function(err, res, body) {
+    request("https://www.freegeoip.net/json/" + ip, function(err, res, body) {
         if (!err && res.statusCode == 200)
         {
             /* Copy number of attempts into new data object, then
