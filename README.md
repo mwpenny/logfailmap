@@ -8,6 +8,8 @@ A module for extracting and locating IPs that failed to login to a Linux machine
 
 ### Dependencies
 * [request](http://github.com/request/request) - Simple HTTP request client
+* [stream-splitter](http://github.com/samcday/node-stream-splitter) - Library for splitting streams
+* Standard Unix utilities (sh, last, awk)
 
 ### Installation
 `npm install logfailmap`

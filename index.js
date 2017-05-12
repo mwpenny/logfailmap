@@ -3,9 +3,12 @@
 
 var fs = require("fs");
 var request = require("request");
+var spawn = require("child_process").spawn;
+var streamSplitter = require("stream-splitter");
+
 
 /* Add geographical information from IP address and add to connection attempt object */
-var geolocate = function(connections, ip, callback) {
+var geolocate = function(connections, ip, cb) {
     request("https://www.freegeoip.net/json/" + ip, function(err, res, body) {
         if (!err && res.statusCode == 200)
         {
@@ -15,60 +18,65 @@ var geolocate = function(connections, ip, callback) {
             connection.attempts = connections[ip].attempts;
             connections[ip] = connection;
         }
-        callback();
+        else
+            console.error(err);
+        cb();
     });
 }
 
+var isValidIP = function(ip) {
+    var split = ip.split(".");
+    if (split.length != 4)
+        return false;
+    for (var i = 0; i < split.length; ++i) {
+        var octet = split[i];
+        if (isNaN(octet) || parseInt(octet) < 0 || parseInt(octet) > 255)
+            return false;
+    }
+    return true;
+}
+
 /* Get invalid user login IPs and attempt counts */
-var getConnectionIPs = function(logfile, callback) {
+var getConnectionIPs = function(btmp, cb) {
     var connections = {};
 
-    fs.readFile(logfile, "UTF-8", function(err, data) {
-        if (err) return callback(err, connections);
-        
-        // Extract date, attempted username, and IP
-        /*var re = /(\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}).*Invalid user (\S+?) from (.*)/g;
-            x[1] == date
-            x[2] == user
-            x[3] == ip
-        */
+    // Get the list of bad login attempts, isolate for IP, then count duplicates
+    var cmd = "last -i -f " + btmp + " | awk '{if (NF == 9) print $2; else if (NF == 10) print $3}'";
+    var proc = spawn("sh", ["-c", cmd]);
+    var stream = proc.stdout.pipe(streamSplitter("\n"));
+    stream.encoding = "utf8";
 
-        //Helper function
-        var incAttempts = function(connections, ip) {
+    stream.on("token", function(ip) {
+        if (isValidIP(ip)) {
             if (!connections.hasOwnProperty(ip))
                 connections[ip] = { "attempts": 1 };
             else
-                ++connections[ip].attempts;        
+                ++connections[ip].attempts;
         }
-
-        var re1 = /.*Invalid user \S+? from (.*)/g
-        var re2 = /.*Received disconnect from (.*?):.*Auth fail/g
-        var m;
-
-        //Get invalid user attempts and straight auth fails
-        while (m = re1.exec(data)) incAttempts(connections, m[1]);
-        while (m = re2.exec(data)) incAttempts(connections, m[1]);
-        
-        return callback(null, connections);
-    })
+    });
+    proc.on("exit", function(code) {
+        cb(code != 0, connections);
+    });
+    proc.on("error", cb);
 };
 
 /* Get failed login/connection host IPs and their geographical information */
-var getConnectionAttempts = function(logfile, callback) {
+var getConnectionAttempts = function(btmp, cb) {
     var ret = {date: Date(), connections: {}};
 
-    getConnectionIPs(logfile, function(err, connections) {
-        var IPs = Object.keys(connections);
+    getConnectionIPs(btmp, function(err, connections) {
+        var ips = Object.keys(connections);
         var located = 0;
         
-        if (IPs.length === 0) return callback(ret);
+        if (err || ips.length === 0)
+            return cb(ret);
 
         //Get location information for each IP
-        for (var i = 0; i < IPs.length; ++i) {
-            geolocate(connections, IPs[i], function() {
-                if (++located === IPs.length) {
+        for (var i = 0; i < ips.length; ++i) {
+            geolocate(connections, ips[i], function() {
+                if (++located === ips.length) {
                     ret.connections = connections;
-                    return callback(ret);
+                    return cb(ret);
                 }
             });
         }
