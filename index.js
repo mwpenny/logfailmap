@@ -6,6 +6,8 @@ var request = require("request");
 var spawn = require("child_process").spawn;
 var streamSplitter = require("stream-splitter");
 
+var MAX_CONCURRENT_CONNECTIONS = 10;
+
 
 /* Add geographical information from IP address and add to connection attempt object */
 var geolocate = function(connections, ip, cb) {
@@ -18,10 +20,25 @@ var geolocate = function(connections, ip, cb) {
             connection.attempts = connections[ip].attempts;
             connections[ip] = connection;
         }
-        else
-            console.error(err);
         cb();
     });
+}
+
+var batchLocate = function(connections, ips, start, cb) {
+    // Batch retrieval of IP locations (so not too many simultaneous connections are made)
+    var end = Math.min(start + MAX_CONCURRENT_CONNECTIONS, ips.length);
+    var located = 0;
+    for (var i = start; i < end; ++i) {
+        geolocate(connections, ips[i], function() {
+            // Finished batch
+            if (++located === (end - start)) {
+                if (i < ips.length)
+                    batchLocate(connections, ips, i, cb);
+                else
+                    cb();
+            }
+        });
+    }
 }
 
 var isValidIP = function(ip) {
@@ -66,20 +83,14 @@ var getConnectionAttempts = function(btmp, cb) {
 
     getConnectionIPs(btmp, function(err, connections) {
         var ips = Object.keys(connections);
-        var located = 0;
-        
         if (err || ips.length === 0)
             return cb(ret);
 
         //Get location information for each IP
-        for (var i = 0; i < ips.length; ++i) {
-            geolocate(connections, ips[i], function() {
-                if (++located === ips.length) {
-                    ret.connections = connections;
-                    return cb(ret);
-                }
-            });
-        }
+        batchLocate(connections, ips, 0, function() {
+            ret.connections = connections;
+            cb(ret);
+        });
     });
 }
 

@@ -3,7 +3,7 @@ A module for extracting and locating IPs that failed to login to a Linux machine
 
 
 ### Features
-* Retrieve IPs from logfiles of machines that failed to connect to the machine
+* Retrieve IPs of machines that failed to connect to the machine from bad login logfile (btmp)
 * Obtain geographical data about the IP addresses
 
 ### Dependencies
@@ -18,7 +18,7 @@ A module for extracting and locating IPs that failed to login to a Linux machine
 ```js
 var logfailmap = require("logfailmap");
 
-logfailmap("/var/log/auth.log", function(attempts) {
+logfailmap("/var/log/btmp", function(attempts) {
     //Use the attempts object
 });
 ```
