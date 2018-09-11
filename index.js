@@ -10,12 +10,12 @@ var MAX_CONCURRENT_CONNECTIONS = 10;
 
 
 /* Add geographical information from IP address and add to connection attempt object */
-var geolocate = function(connections, ip, cb) {
-    request("https://www.freegeoip.net/json/" + ip, function(err, res, body) {
+var geolocate = function(connections, ip, apiKey, cb) {
+    request("http://api.ipstack.com/" + ip + "?access_key=" + apiKey, function(err, res, body) {
         if (!err && res.statusCode == 200)
         {
             /* Copy number of attempts into new data object, then
-               overwrite the old connection attempt object */ 
+               overwrite the old connection attempt object */
             var connection = JSON.parse(body);
             connection.attempts = connections[ip].attempts;
             connections[ip] = connection;
@@ -24,16 +24,16 @@ var geolocate = function(connections, ip, cb) {
     });
 }
 
-var batchLocate = function(connections, ips, start, cb) {
+var batchLocate = function(connections, ips, start, apiKey, cb) {
     // Batch retrieval of IP locations (so not too many simultaneous connections are made)
     var end = Math.min(start + MAX_CONCURRENT_CONNECTIONS, ips.length);
     var located = 0;
     for (var i = start; i < end; ++i) {
-        geolocate(connections, ips[i], function() {
+        geolocate(connections, ips[i], apiKey, function() {
             // Finished batch
             if (++located === (end - start)) {
                 if (i < ips.length)
-                    batchLocate(connections, ips, i, cb);
+                    batchLocate(connections, ips, i, apiKey, cb);
                 else
                     cb();
             }
@@ -78,7 +78,7 @@ var getConnectionIPs = function(btmp, cb) {
 };
 
 /* Get failed login/connection host IPs and their geographical information */
-var getConnectionAttempts = function(btmp, cb) {
+var getConnectionAttempts = function(btmp, apiKey, cb) {
     var ret = {date: Date(), connections: {}};
 
     getConnectionIPs(btmp, function(err, connections) {
@@ -87,7 +87,7 @@ var getConnectionAttempts = function(btmp, cb) {
             return cb(ret);
 
         //Get location information for each IP
-        batchLocate(connections, ips, 0, function() {
+        batchLocate(connections, ips, 0, apiKey, function() {
             ret.connections = connections;
             cb(ret);
         });

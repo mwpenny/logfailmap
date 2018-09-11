@@ -1,5 +1,6 @@
 # logfailmap
 A module for extracting and locating IPs that failed to login to a Linux machine
+Note that logfailmap uses [ipstack](https://ipstack.com), which requires an API key. The free tier allows 10000 requests per month.
 
 
 ### Features
@@ -17,14 +18,15 @@ A module for extracting and locating IPs that failed to login to a Linux machine
 ##### Example usage
 ```js
 var logfailmap = require("logfailmap");
+var apiKey = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;  // IPStack API key
 
-logfailmap("/var/log/btmp", function(attempts) {
+logfailmap("/var/log/auth.log", apiKey, function(attempts) {
     //Use the attempts object
 });
 ```
 
 ##### Attempts object
-The attempts object contains one key/value pair for the date and time the information was retrieved. The rest of the keys are the IP addresses that failed to connect. The values are objects containing the geographical information for each IP, as well as the number of login attempts. Geographical information is obtained from [www.freegeoip.net](http://www.freegeoip.net/) and some IP addresses have less information available than others (e.g., no city). For example,
+The attempts object contains one key/value pair for the date and time the information was retrieved. The rest of the keys are the IP addresses that failed to connect. The values are objects containing the geographical information for each IP, as well as the number of login attempts. Geographical information is obtained from [ipstack](https://ipstack.com/) and some IP addresses have less information available than others (e.g., no city). For example,
 ```js
 { date: 'Sat Aug 08 2015 14:00:44 GMT-0400 (EDT)',
   connections: 
